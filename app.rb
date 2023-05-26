@@ -96,12 +96,16 @@ class Application < Sinatra::Base
        
     repo.create(@new_booking)
 
+    listing = ListingRepository.new
+    booked_listing = listing.find(params[:id])
+    listing_name = booked_listing.name
+    listing_price = booked_listing.price
+
     content_type 'application/json'
 
     session = Stripe::Checkout::Session.create({
       line_items: [{
-        # Provide the exact Price ID (e.g. pr_1234) of the product you want to sell
-        price_data: {currency: 'GBP', product_data: {name: 'example'}, unit_amount: 100},
+        price_data: {currency: 'GBP', product_data: {name: listing_name}, unit_amount: listing_price},
         quantity: 1,
       }],
       mode: 'payment',

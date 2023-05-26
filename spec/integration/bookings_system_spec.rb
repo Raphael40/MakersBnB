@@ -96,8 +96,7 @@ describe BookingRepository do
     it 'posts a selected date to bookings' do
       login_for_test
       response = post('/listings/1/booking', date: '2023-04-10', confirmed: false, listing_id: '1')
-      expect(response.status).to eq(200)
-      expect(response.body).to include('Your Bookings')
+      expect(response.status).to eq(303)
 
       repo = BookingRepository.new
       new_booking = repo.find(4)
@@ -118,7 +117,7 @@ describe BookingRepository do
         listing_id: '1'
       )
 
-      expect(response.status).to eq(200)
+      expect(response.status).to eq(303)
 
       repo = BookingRepository.new
 
