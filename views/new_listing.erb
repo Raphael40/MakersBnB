@@ -1,4 +1,4 @@
-<h1>Add a new listing</h1>
+<h1>Add A New Listing</h1>
 
 <% if flash[:error] %>
     <div class="alert alert-danger" role="alert">
@@ -6,15 +6,18 @@
     </div>
 <% end %>  
 
-<form method="POST" action="/listings/new">
-    <label for="name">Name:</label>
-    <input type="text" name="name" />
+<% if flash[:date_error] %>
+    <div class="alert alert-danger" role="alert">
+        <%= flash[:date_error] %>  
+    </div>
+<% end %>  
 
-    <label for="price">Price:</label>
-    <input type="number" name="price" />
+<form method="POST" action="/listings/new" class="new-listing">
+    <input type="text" cols="50" name="name" placeholder="Name"/>
 
-    <label for="description">Description:</label>
-    <input type="text" name="description" />
+    <input type="number" name="price" placeholder="Price"/>
+
+    <textarea rows="4" name="description" placeholder="Description"></textarea>
 
     <label for="start_date">Available From:</label>
     <input type="date" name="start_date" min="<%= Date.today%>"/>

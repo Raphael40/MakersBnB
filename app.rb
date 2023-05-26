@@ -30,7 +30,9 @@ class Application < Sinatra::Base
     if session[:user_id] == nil
       return redirect '/'
     else
-      @current_id = session[:user_id]
+      user_repo = UserRepository.new
+      @user = user_repo.find(session[:user_id])
+
       repo = ListingRepository.new
       @listings = repo.all
       return erb(:listings)
@@ -41,7 +43,8 @@ class Application < Sinatra::Base
     if session[:user_id] == nil
       return redirect '/'
     else
-      @current_id = session[:user_id]
+      user_repo = UserRepository.new
+      @user = user_repo.find(session[:user_id])
       return erb(:new_listing)
     end
   end
@@ -50,6 +53,10 @@ class Application < Sinatra::Base
     if session[:user_id] == nil
       return redirect '/'
     else
+
+      user_repo = UserRepository.new
+      @user = user_repo.find(session[:user_id])
+
       repo = ListingRepository.new
   
       @listing = repo.find(params[:id])
@@ -127,19 +134,23 @@ class Application < Sinatra::Base
     
     if dates_checker(new_listing)
       status 400
-      return "The end date must be after the start date. <button onclick='history.back();'>Try again.</button>"
+      flash[:date_error] = 'The end date must be after the start date.'
+      return redirect '/listings/new'
     end
 
     repo.create(new_listing)
     status 200
-    return 'Listing added successfully. <a href="/listings">Back to all listings</a>'
+    flash[:listing_success] = 'Listing successfully created!'
+    return redirect '/listings'
   end
 
   get '/requests' do
     if session[:user_id] == nil
       return redirect '/'
     else
-      @current_id = session[:user_id]
+      user_repo = UserRepository.new
+      @user = user_repo.find(session[:user_id])
+      
       booking_repo = BookingRepository.new
       @user_repo = UserRepository.new
       @listing_repo = ListingRepository.new
@@ -149,11 +160,20 @@ class Application < Sinatra::Base
 
       listings = @listing_repo.find_by_user_id(session[:user_id])
       
-      @bookings = []
+      bookings = []
       listings.each do |listing| 
-        @bookings += booking_repo.find_by_listing(listing.id)
+        bookings += booking_repo.find_by_listing(listing.id)
       end
-        erb(:requests)
+
+      @unconfirmed_bookings = bookings.select do |booking|
+        !booking.confirmed
+      end
+
+      @confirmed_bookings = bookings.select do |booking|
+        booking.confirmed
+      end
+
+      erb(:requests)
     end
   end
 
@@ -162,7 +182,7 @@ class Application < Sinatra::Base
     booking = repo.find(params[:id])
 
     repo.confirm_booking(booking)
-      return ("Booking Confirmed!") #Could have a flash pop-up here
+    redirect('/requests')
   end
 
   post '/signup' do
@@ -170,22 +190,22 @@ class Application < Sinatra::Base
     listing_repo = ListingRepository.new
     @listings = listing_repo.all
     
-    user = User.new
-    user.email = params[:email]
-    user.password = params[:password]
+    @user = User.new
+    @user.email = params[:email]
+    @user.password = params[:password]
     
     repo = UserRepository.new
-    if user.email.empty? || user.password.empty?
+    if @user.email.empty? || @user.password.empty?
       flash[:signup_error] = "Please enter valid email and password"
       redirect "/"
-    elsif user.email.empty? && user.password.empty?
+    elsif @user.email.empty? && @user.password.empty?
       flash[:signup_error] = "Please enter valid email and password"
       redirect "/"
     end
     
-    repo.create(user)
-    erb(:index)
-
+    repo.create(@user)
+    flash[:success] = "Sign up success!"
+    return redirect "/"
   end
   
   post '/login' do
@@ -212,10 +232,11 @@ class Application < Sinatra::Base
     if sign_in_status == true
       
       session[:user_id] = user.id
-      @current_id = session[:user_id]
+
+      @user = repo.find(user.id)
       return erb(:listings)
     else
-      return erb(:signup_fail)
+      return erb :signup_fail, layout: nil
     end
   end
   

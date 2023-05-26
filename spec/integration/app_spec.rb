@@ -58,7 +58,7 @@ describe Application do
       
       response = get('/listings')
       expect(response.status).to eq 200
-      expect(response.body).to include 'These are the listings'
+      expect(response.body).to include 'Available Listings'
     end
 
     it 'redirects to listings page on success' do
@@ -106,7 +106,7 @@ describe Application do
 
       response = get('/listings')
       expect(response.status).to eq 200
-      expect(response.body).to include 'These are the listings'
+      expect(response.body).to include 'Available Listings'
     end
   end
 
@@ -137,25 +137,35 @@ describe Application do
       response = get('/listings')
 
       expect(response.body).to include '<nav'
+      expect(response.body).to include 'julian@example.com'
     end
   end
-
+  
   context 'GET /listings/new' do
     it 'should return a form to add a new listing' do
       response = get('/listings/new')
-        
+      
       expect(response.status).to eq 302
-
+      
       login_for_test
-    
+      
       response = get('/listings/new')
-
+      
       expect(response.status).to eq(200)
-      expect(response.body).to include('Add a new listing')
-      expect(response.body).to include('<form method="POST" action="/listings/new">')
+      expect(response.body).to include('Add A New Listing')
+      expect(response.body).to include('<form method="POST" action="/listings/new"')
+    end
+
+    it 'returns a page with a navbar' do
+      login_for_test
+     
+      response = get('/listings/new')
+  
+      expect(response.body).to include '<nav'
+      expect(response.body).to include 'julian@example.com'
     end
   end
-
+  
   context 'POST /listings/new' do
     it 'should add a new listing' do
       login_for_test
@@ -180,8 +190,7 @@ describe Application do
       expect(listings.last.end_date).to eq('2023-07-16')
       expect(listings.last.user_id).to eq('1')
 
-      expect(response.status).to eq 200
-      expect(response.body).to include('Listing added successfully')
+      expect(response.status).to eq 302
 
       response = get('/listings')
       expect(response.body).to include('listing_3')
@@ -200,8 +209,7 @@ describe Application do
         user_id: '2'
       )
 
-      expect(response.status).to eq 400
-      expect(response.body).to include('The end date must be after the start date')
+      expect(response.status).to eq 302
     end
 
     it 'returns a flash error when name, price, description are invalid' do
@@ -239,7 +247,7 @@ describe Application do
   context 'POST /requests/confirm' do
     it 'post a TRUE value to the database' do
       response = post('/requests/confirm/1')
-      expect(response.status).to eq 200
+      expect(response.status).to eq 302
 
       repo = BookingRepository.new 
       booking = repo.find(1)
@@ -306,7 +314,33 @@ describe Application do
         password: 'test'
       )
       response = get('/requests')
-      expect(response.body).to include '2023-04-09'
+      expect(response.body).to include '9 April 2023'
+    end
+
+    it 'returns a page with a navbar' do
+      login_for_test
+     
+      response = get('/requests')
+  
+      expect(response.body).to include '<nav'
+      expect(response.body).to include 'julian@example.com'
+    end
+
+    context 'when a booking is not confirmed' do
+      it 'says confirmed' do
+        login_for_test
+        response = get('/requests')
+        expect(response.body).not_to include 'CONFIRMED'
+      end
+    end
+
+    context 'when a booking is confirmed' do
+      it 'says confirmed' do
+        login_for_test
+        post('/requests/confirm/1')
+        response = get('/requests')
+        expect(response.body).to include 'CONFIRMED'
+      end
     end
   end
 

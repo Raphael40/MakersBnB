@@ -80,6 +80,15 @@ describe BookingRepository do
         expect(response.body).to include ('min="2023-04-07"')
       end
     end
+
+    it 'returns a page with a navbar' do
+      login_for_test
+     
+      response = get('/listings/1')
+  
+      expect(response.body).to include '<nav'
+      expect(response.body).to include 'julian@example.com'
+    end
   end
 
 
@@ -88,7 +97,7 @@ describe BookingRepository do
       login_for_test
       response = post('/listings/1/booking', date: '2023-04-10', confirmed: false, listing_id: '1')
       expect(response.status).to eq(200)
-      expect(response.body).to eq('')
+      expect(response.body).to include('Your Bookings')
 
       repo = BookingRepository.new
       new_booking = repo.find(4)
@@ -110,7 +119,6 @@ describe BookingRepository do
       )
 
       expect(response.status).to eq(200)
-      expect(response.body).to eq('')
 
       repo = BookingRepository.new
 

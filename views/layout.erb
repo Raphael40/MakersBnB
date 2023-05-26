@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="icon" type="image/x-icon" href="favicon.png">
+        <link rel="icon" type="image/x-icon" href="/favicon.png">
         <title>MakersBnB</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,19 +11,33 @@
 
     <body>
         <nav>
-            <img id="logo" src="/logo.png" alt="logo">
-            <h5 id='logged'>You are logged in as: <%= @current_id %></h5>
+            <div class="nav-left">
+                <img id="logo" src="/logo.png" alt="logo">
+                <h5 id='logged'>You are logged in as <%= @user.email %></h5>
+            </div>
             <ul class="nav-links">
                 <li><form method='POST' action='/logout'>
                     <button type="submit" class="nav_button">Logout</button>
                 </form></li>
+                <li><a href="/your_bookings" >Your Bookings</a></li>
+                <li><a href="/requests" >Requests</a></li>
                 <li><a href="/listings/new" >New Listing</a></li>           
                 <li><a href="/listings" >All Listings</a></li>           
-                <li><a href="/requests" >Requests</a></li>
             </ul>
         </nav>
+        
         <main>
             <%= yield %>
         </main>
+        <%# <div class="content">
+            <div class ="wrapper"> %>
+        		<footer>
+							<div class="footer">    
+							<p><a href='https://www.youtube.com/watch?v=SyimUCBIo6c' target='_blank'>Team Merge Masters © 2023 </a><br>
+							<a href='https://github.com/aliceswood' target='_blank'>Alice Wood</a> - <a href='https://github.com/aandre6891' target='_blank'>Andrea Ruggieri</a> - <a href='https://github.com/CKMurison' target='_blank'>Cameron Murison</a> - <a href='https://github.com/ev-th' target='_blank'>Evan Thomas</a> - <a href='https://github.com/Raphael40' target='_blank'>Julian Festing</a> - <a href='https://github.com/awdem' target='_blank'>Will De Montmollin</a></p>
+							</div>
+				</footer>
+            <%# </div>
+        </div> %>
     </body>
 </html>
